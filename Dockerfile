@@ -23,7 +23,7 @@ RUN conda config --env --set always_yes true
 RUN conda update conda
 RUN conda install python=3.8
 RUN conda install bioconda::blast=2.12.0
-RUN conda install bioconda::muscle=3.8.31
+RUN conda install bioconda::muscle=5.1
 
 RUN pip3 install biopython==1.79
 RUN pip3 install reportlab==4.1.0

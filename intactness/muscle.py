@@ -12,7 +12,7 @@ def muscle(configs):
 
     file_i = configs['file_seq']
     file_o = configs['file_aln']
-    maxiters = configs['maxiters']
+    # maxiters = configs['maxiters']
 
-    cmd = ['muscle', '-in', file_i, '-out', file_o, '-maxiters', maxiters]
+    cmd = ['muscle', '-super5', file_i, '-output', file_o]
     run_cmd(cmd)
