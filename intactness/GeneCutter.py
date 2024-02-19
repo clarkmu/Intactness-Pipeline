@@ -59,12 +59,27 @@ def submit_GC(email_address):
     br['EMAIL2'] = email_address
     response = br.submit_selected()
 
-    logger.info('Submitting job to Gene Cutter')
-    sleep_btw(0, 5)
+    #edits below made for larger submissions.  original submission may have assumed a single sequence
+
+    logger.info('Submitting job to Gene Cutter. Waiting 1 minutes.')
+    # sleep_btw(0, 5)
+    time.sleep(60)
+
+    logger.info("Content: {}".format(response.content.decode()) )
 
     # Parse download url
-    job_id = re.search(r'<b>/tmp/GENE_CUTTER/(.*)</b>',
-            response.content.decode()).group(1)
+    # job_id = re.search(r'<b>/tmp/GENE_CUTTER/(.*)</b>',
+    #         response.content.decode()).group(1)
+
+    job_id = ""
+
+    while True:
+        if response.content.decode() and response.content.decode().groups() and response.content.decode().group(1):
+            job_id = response.content.decode().group(1)
+            break
+        else:
+            logger.info("Waiting for content.  If this has taken over (1 hour per 100 sequences), please abort and retry submission.")
+            time.sleep(30)
 
     logger.info('Gene Cutter Job ID: {}'.format(job_id))
     sleep_btw(0, 5)

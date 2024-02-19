@@ -5,3 +5,5 @@ __pycache__
 
 data/*.seq
 data/*.fasta
+
+/intactness/default.cfg
