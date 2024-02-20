@@ -1,117 +1,49 @@
 # coding: utf-8
-import time
 import re
-import sys
 import logging
-import zipfile
+
 import os
 
-import mechanicalsoup
+import requests
 
-from datetime import datetime
-from datetime import datetime
-from random import randrange
 from collections import defaultdict
-
-# Disable warning
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # pylint: disable=C0103
 # Invalid constant name
 logger = logging.getLogger('pipe.GeneCutter')
 
-URL_BASE = "https://www.hiv.lanl.gov/"
+GC_URL="https://www.hiv.lanl.gov/cgi-bin/Gene_Cutter/simpleGC"
 
-def sleep_btw(early, late):
-    time.sleep(randrange(early, late))
-
-def submit_GC(email_address):
+def submit_GC():
     """
     Submit aligned seqs to Gene Cutter and start the job
 
     """
 
-    # Create browser object
-    br = mechanicalsoup.StatefulBrowser()
+    input_file="data/seqs/seqs_psc.fasta"
+    output_dir="data/seqs/Gene_Cutter"
 
-    # Open website
-    url_gene_cutter = URL_BASE + "content/sequence/GENE_CUTTER/cutter.html"
-    br.open(url_gene_cutter, verify = False)
+    # UPDATE JAN 2024
+    # Use SimpleGC API instead of MechanicalSoup to simulate form submission
 
-    logger.info('Opening Gene Cutter website')
-    sleep_btw(0, 5)
+    # this cannot be reused
+    # files={'seq_upload': open(input_file, 'rb')}
+    data={'insert_ref': 'Yes'}
 
-    # Upload sequences
-    br.select_form('form[method="post"]')
-    br['INSERTSTDSEQ'] = 'YES'
-    br['UPLOAD'] = 'data/seqs/seqs_psc.fasta'
-    response = br.submit_selected()
+    # curl --form region="Gag" --form translate="No" --form "seq_upload=@data/seqs/seqs_psc.fasta" --form "insert_ref=Yes" https://www.hiv.lanl.gov/cgi-bin/GENE_CUTTER/simpleGC
+    res = requests.post(GC_URL, data=data, files={'seq_upload': open(input_file, 'rb')})
 
-    logger.info('Uploading sequences to Gene Cutter')
-    sleep_btw(0, 5)
+    os.makedirs(output_dir, exist_ok=True)
 
-    # Fill in contact information and start the job
-    # TODO use custom email
-    br.select_form('form[method="post"]')
-    br['titleFromUser'] = 'PSC ' + datetime.now().strftime("%Y-%m-%d %H:%M")
-    br['EMAIL'] = email_address
-    br['EMAIL2'] = email_address
-    response = br.submit_selected()
+    with open(f'{output_dir}/ALL.AA.PRINT', 'w') as out:
+        out.write(res.text)
 
-    #edits below made for larger submissions.  original submission may have assumed a single sequence
-
-    logger.info('Submitting job to Gene Cutter. Waiting 1 minutes.')
-    # sleep_btw(0, 5)
-    time.sleep(60)
-
-    logger.info("Content: {}".format(response.content.decode()) )
-
-    # Parse download url
-    # job_id = re.search(r'<b>/tmp/GENE_CUTTER/(.*)</b>',
-    #         response.content.decode()).group(1)
-
-    job_id = ""
-
-    while True:
-        if response.content.decode() and response.content.decode().groups() and response.content.decode().group(1):
-            job_id = response.content.decode().group(1)
-            break
-        else:
-            logger.info("Waiting for content.  If this has taken over (1 hour per 100 sequences), please abort and retry submission.")
-            time.sleep(30)
-
-    logger.info('Gene Cutter Job ID: {}'.format(job_id))
-    sleep_btw(0, 5)
-
-    url_download = f'https://www.hiv.lanl.gov/cgi-bin/common_code/download.cgi?/tmp/GENE_CUTTER/{job_id}/genecutter.zip'
-    url_all = f'https://www.hiv.lanl.gov/tmp/GENE_CUTTER/{job_id}/all_aa.html'
-
-    # Check the result availability
-    while True:
-        # TODO Progressively increate wait time
-        sleep_btw(60, 61)
-        response = br.get(url_download, verify=False)
-
-        if b'Request Rejected' not in response.content:
-            with open('data/seqs/genecutter.zip', 'wb') as fh:
-                fh.write(response.content)
-            fnz = zipfile.ZipFile('data/seqs/genecutter.zip', 'r')
-            fnz.extractall('data/seqs/')
-            fnz.close()
-
-            os.rename('data/seqs/genecutter', 'data/seqs/Gene_Cutter')
-            os.mkdir('data/seqs/Gene_Cutter/indv_reports')
-
-            response = br.get(url_all, verify=False)
-
-            with open('data/seqs/Gene_Cutter/ALL.AA.PRINT', 'w') as out:
-                content = re.sub(r'<br>', '\n', response.content.decode())
-                content = re.sub(r'<.*?>', '', content)
-                out.write(content)
-
-            break
-
+    data['return_format']="fasta"
+    for region in ['Gag', 'Pol', 'Env']:
+        data['region'] = region
+        res = requests.post(GC_URL, data=data, files={'seq_upload': open(input_file, 'rb')})
+        with open(f'{output_dir}/{region}.aa.fasta', 'w') as out:
+            out.write(res.text)
 
 def process_GC():
     # Parse results

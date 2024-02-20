@@ -17,15 +17,11 @@ sh docker.sh build
 sh docker.sh start
 ```
 
-
-
 # Running instruction
 
 The following steps should be taken in order, in the root folder of the project.
 
 1. Store the DNA sequences in a FASTA file named "seqs.fasta" in `data` folder (see example at /data/seqs.example.fasta)
-1. Specify your email address on line 5 of `intactness/default.cfg`
-
 
 ```
 sh docker.sh bash

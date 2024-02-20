@@ -21,10 +21,6 @@ def configs(filename):
     cfg = ConfigParser(interpolation=ExtendedInterpolation())
     cfg.read(filename)
 
-    if cfg['Main']['email'] == '':
-        print('Please specify your email address')
-        exit(1)
-
     folder = cfg['Main']['path_out']
     if os.path.exists(folder):
         msg = '{} already existed'.format(folder)

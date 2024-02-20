@@ -27,7 +27,6 @@ RUN conda install bioconda::muscle=5.1
 
 RUN pip3 install biopython==1.79
 RUN pip3 install reportlab==4.1.0
-RUN pip3 install mechanicalsoup==0.11.0
 RUN pip3 install lxml==5.1.0
 RUN pip3 install PyPDF2==1.26.0
 RUN pip3 install scipy==1.10.1

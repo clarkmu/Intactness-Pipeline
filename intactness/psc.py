@@ -34,7 +34,7 @@ def psc(configs, seqs):
         return
 
     seqs.write('data/seqs/seqs_psc.fasta', psc_list)
-    submit_GC(configs['email'])
+    submit_GC()
     process_GC()
 
     for gene in ['Gag', 'Pol', 'Env']:
@@ -129,6 +129,8 @@ def psc(configs, seqs):
 
     if f_size == 0:
         return
+
+    os.makedirs(configs["path_out"] + "/Gene_Cutter/indv_reports", exist_ok=True)
 
     for qid in seqs.qids:
         if seqs.call[qid]['deletion'] == 'No' and \
