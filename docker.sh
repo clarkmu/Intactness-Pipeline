@@ -3,7 +3,7 @@
 name="intactness-pipeline-container"
 
 function _build {
-    # default --platform is for M-series macbooks
+    # current --platform is for M-series macbooks
     # Windows users use        --platform darwin/amd64
     # linux users use          --platform linux/amd64
     docker build -t "$name" ./ --platform linux/amd64

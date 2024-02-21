@@ -14,14 +14,14 @@ logger = logging.getLogger('pipe.GeneCutter')
 
 GC_URL="https://www.hiv.lanl.gov/cgi-bin/Gene_Cutter/simpleGC"
 
-def submit_GC():
+def submit_GC(path_out):
     """
     Submit aligned seqs to Gene Cutter and start the job
 
     """
 
-    input_file="data/seqs/seqs_psc.fasta"
-    output_dir="data/seqs/Gene_Cutter"
+    input_file=f"{path_out}/seqs_psc.fasta"
+    output_dir=f"{path_out}/Gene_Cutter"
 
     # UPDATE JAN 2024
     # Use SimpleGC API instead of MechanicalSoup to simulate form submission
@@ -45,12 +45,12 @@ def submit_GC():
         with open(f'{output_dir}/{region}.aa.fasta', 'w') as out:
             out.write(res.text)
 
-def process_GC():
+def process_GC(path_out):
     # Parse results
     results = defaultdict(dict)
 
     gene_set = set(['Gag', 'Pol', 'Env'])
-    with open('data/seqs/Gene_Cutter/ALL.AA.PRINT') as fn:
+    with open(f"{path_out}/Gene_Cutter/ALL.AA.PRINT") as fn:
         line = fn.readline()
         while line:
             if line.startswith('---------- List of Stop Codons Within Sequences'):
@@ -92,7 +92,7 @@ def process_GC():
                 line = fn.readline()
 
     if (len(results) == 0):
-        with open('data/seqs/summary_psc.tsv', 'w') as fn:
+        with open(f"{path_out}/summary_psc.tsv", 'w') as fn:
             print('Contig\tRef\tType\tPSC', file=fn)
     else:
         final_results = defaultdict(dict)
@@ -113,7 +113,7 @@ def process_GC():
                     else:
                         final_results.setdefault(gene, {}).setdefault(contig, {}).setdefault(event[1], []).append((event[0], event[2]))
 
-        with open('data/seqs/summary_psc.tsv', 'w') as fn:
+        with open(f"{path_out}/summary_psc.tsv", 'w') as fn:
             print('Contig\tRef\tType\tPSC', file=fn)
             # Remove beginning and ending
             for gene, contigs in final_results.items():

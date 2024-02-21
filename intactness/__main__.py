@@ -24,13 +24,25 @@ from .psc import psc
 from .defect import defect
 from .summary import summary
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-in", "--input", help="Location to input.  Please use an asbolute path (path starts with '/', not './').")
+args = parser.parse_args()
+seq_in = args.input
+
+if not seq_in:
+    print('Please provide an input sequence file.  Use -h for help.')
+    sys.exit()
+
+if seq_in[-1] == '/':
+    seq_in = seq_in[:-1]
 
 logger = logging.getLogger('pipe')
 logger.setLevel(logging.INFO)
 
 import os
 mod_path = os.path.dirname(os.path.abspath(__file__))
-cfg = configs(os.path.join(mod_path, 'default.cfg'))
+cfg = configs(os.path.join(mod_path, 'default.cfg'), seq_in)
 
 seqs = Sequences(cfg['Query'], cfg['Reference'])
 

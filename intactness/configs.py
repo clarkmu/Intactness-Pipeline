@@ -13,19 +13,23 @@ from configparser import ConfigParser, ExtendedInterpolation
 logger = logging.getLogger('pipe')
 
 
-def configs(filename):
+def configs(filename, seq_in):
     """Parse configurations
     """
     logger.info('Checking parameters')
 
     cfg = ConfigParser(interpolation=ExtendedInterpolation())
+
     cfg.read(filename)
 
+    # ConfigParser.set resets .cfg variables
+    if seq_in:
+        seq_in_folder = seq_in[:seq_in.rindex('/')]
+        cfg.set('Main', 'path_dat', seq_in_folder)
+        cfg.set('Main', 'file_qry', seq_in)
+
     folder = cfg['Main']['path_out']
-    if os.path.exists(folder):
-        msg = '{} already existed'.format(folder)
-        logger.info(msg)
-    else:
+    if not os.path.exists(folder):
         os.makedirs(folder)
 
     # Create a new log file each time the program is started

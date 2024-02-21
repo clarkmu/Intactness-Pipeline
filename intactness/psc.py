@@ -33,9 +33,9 @@ def psc(configs, seqs):
                                      'Env': 'Pass'}
         return
 
-    seqs.write('data/seqs/seqs_psc.fasta', psc_list)
-    submit_GC()
-    process_GC()
+    seqs.write(f'{configs["path_out"]}/seqs_psc.fasta', psc_list)
+    submit_GC(configs["path_out"])
+    process_GC(configs["path_out"])
 
     for gene in ['Gag', 'Pol', 'Env']:
         file_aln = configs['path_out'] + \
