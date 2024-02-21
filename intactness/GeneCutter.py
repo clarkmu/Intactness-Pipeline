@@ -12,7 +12,7 @@ from collections import defaultdict
 # Invalid constant name
 logger = logging.getLogger('pipe.GeneCutter')
 
-GC_URL="https://www.hiv.lanl.gov/cgi-bin/Gene_Cutter/simpleGC"
+GC_URL="https://www.hiv.lanl.gov/cgi-bin/GENE_CUTTER/simpleGC"
 
 def submit_GC(path_out):
     """
