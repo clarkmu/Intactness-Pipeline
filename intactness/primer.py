@@ -3,7 +3,7 @@ Check whether the primer sequences are in the sequenes.
 """
 
 import logging
-import re
+from re import split
 
 # pylint: disable=C0103
 # Invalid constant name
@@ -20,7 +20,7 @@ def primer(configs, seqs):
     logger.info('Checking primers')
 
     # Forward
-    primers_fwd = re.split(';\n?', configs['primers'])
+    primers_fwd = split(';\n?', configs['primers'])
 
     # Reverse complement (translate then reverse the order)
     table = str.maketrans('ATGC', 'TACG')

@@ -5,7 +5,7 @@ import os.path
 from math import floor
 import re
 
-from Bio import SeqIO
+from Bio.SeqIO import parse as SeqIO_parse
 
 from .GeneCutter import submit_GC, process_GC
 
@@ -13,7 +13,7 @@ from .GeneCutter import submit_GC, process_GC
 # Invalid constant name
 logger = logging.getLogger('pipe.psc')
 
-def psc(configs, seqs):
+def psc(configs, seqs, seq_in):
     """Premature stop codon"""
     # Logging
     logger.info('Checking PSC')
@@ -33,8 +33,10 @@ def psc(configs, seqs):
                                      'Env': 'Pass'}
         return
 
-    seqs.write(f'{configs["path_out"]}/seqs_psc.fasta', psc_list)
-    submit_GC(configs["path_out"])
+    seqs.write(configs["file_target"], psc_list)
+
+    # configs["path_out"], {configs["file_target"]}
+    submit_GC(configs["path_out"], configs["file_target"])
     process_GC(configs["path_out"])
 
     for gene in ['Gag', 'Pol', 'Env']:
@@ -49,7 +51,7 @@ def psc(configs, seqs):
         if f_size == 0:
             continue
 
-        recs = SeqIO.parse(file_aln, 'fasta')
+        recs = SeqIO_parse(file_aln, 'fasta')
 
         # Reference
         ref = next(recs)

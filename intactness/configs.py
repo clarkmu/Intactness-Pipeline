@@ -3,7 +3,7 @@
 Note: See configparser https://docs.python.org/3/library/configparser.html
 """
 
-import os
+from os import path, makedirs
 import logging
 import datetime
 from configparser import ConfigParser, ExtendedInterpolation
@@ -23,18 +23,15 @@ def configs(filename, seq_in):
     cfg.read(filename)
 
     # ConfigParser.set resets .cfg variables
-    if seq_in:
-        seq_in_folder = seq_in[:seq_in.rindex('/')]
-        cfg.set('Main', 'path_dat', seq_in_folder)
-        cfg.set('Main', 'file_qry', seq_in)
+    seq_in_folder = path.dirname(path.abspath(seq_in))
+    cfg.set('Main', 'path_dat', seq_in_folder)
+    cfg.set('Main', 'file_qry', seq_in)
 
-    folder = cfg['Main']['path_out']
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    makedirs(cfg['Main']['path_out'], exist_ok=True)
 
     # Create a new log file each time the program is started
     date_tag = datetime.datetime.now().strftime("%Y-%b-%d_%H-%M-%S")
-    file_log = "{}/run_{}.log".format(cfg['Main']['path_out'], date_tag)
+    file_log = f"{seq_in_folder}/run_{date_tag}.log"
 
     # Logging format: access time, logger name and message
     fmtr = logging.Formatter('%(asctime)s\t\t%(name)s\t\t%(message)s')

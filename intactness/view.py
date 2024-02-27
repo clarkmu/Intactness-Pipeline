@@ -29,11 +29,7 @@ class View:
         blast_file = configs['file_blast']
         self.out = configs['path_out']
 
-        if os.path.exists(self.out):
-            msg = '{} already existed'.format(self.out)
-            logger.info(msg)
-        else:
-            os.makedirs(self.out)
+        os.makedirs(self.out, exist_ok=True)
 
         self.start = int(configs['UTR_start'])
         self.min_value = min_value
@@ -187,36 +183,26 @@ class View:
     def run(self):
         '''save figures to pdf'''
         for g in self.group:
-            count = 1
             pdf_file = []
             pdf_title = []
 
-            for r in self.group[g]:
-                outfile = '%s_%d.pdf' % (g, count)
+            tmp_dir = self.out + "/temp/"
+
+            os.makedirs(tmp_dir, exist_ok=True)
+
+            for i, r in enumerate(self.group[g]):
+                outfile = tmp_dir + '%s_%d.pdf' % (g, i)
                 gdd = GenomeDiagram.Diagram('Diagram of Blast Alignment')
                 self.draw_alignment(gdd, r, self.query_len[r], self.record[r])
                 gdd.write(outfile, output='pdf')
                 pdf_file.append(outfile)
                 pdf_title.append(r)
-                count += 1
             merger = PdfFileMerger()
-            count = 1
             for f, t in zip(pdf_file, pdf_title):
                 merger.append(PdfFileReader(open(f, 'rb')), bookmark=t,
                               import_bookmarks=True)
-                count += 1
-            outfile = g + '.pdf'
-            if self.out != '':
-                outfile = os.path.join(self.out, outfile)
+            outfile = f'{self.out}/{g}.pdf'
             merger.write(outfile)
             merger.close()
+            os.system(f'rm -rf {tmp_dir}')
         gc.collect()
-        for g in self.group:
-            count = 1
-            for r in self.group[g]:
-                outfile = '%s_%d.pdf' % (g, count)
-                # try:
-                os.remove(outfile)
-                # except:
-                pass
-                count += 1
