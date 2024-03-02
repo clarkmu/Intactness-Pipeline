@@ -10,9 +10,9 @@ Created on Mon Mar 27 00:29:42 2017
 
 from logging import getLogger, INFO
 from os import path
-from time import time
 
 from intactness.args_parse import gather_args
+from .email_error import send_error
 
 # Local module
 from .view import View
@@ -26,16 +26,18 @@ from .hypermut import hypermut
 from .psc import psc
 from .defect import defect
 from .summary import summary
+from .email_results import send_results
+from .execution_time import ExecutionTime
 
 logger = getLogger('pipe')
 logger.setLevel(INFO)
 
 args = gather_args()
 
-def run_pipeline(seq_in):
-    start_time = time()
+def run_pipeline(seq_in, email):
     mod_path = path.dirname(path.abspath(__file__))
     cfg = configs(path.join(mod_path, 'default.cfg'), seq_in)
+    execution_time = ExecutionTime(cfg['Main']['path_out'])
     seqs = Sequences(cfg['Query'], cfg['Reference'])
     primer(cfg['Primer'], seqs)
     blast(cfg['BLAST'], seqs)
@@ -46,8 +48,12 @@ def run_pipeline(seq_in):
     psc(cfg['PSC'], seqs, seq_in)
     defect(cfg['Defect'], seqs)
     summary(cfg['Summary'], seqs)
-    with open(f"{seq_in[:seq_in.rindex('/')]}/execution_time.txt", 'w') as f:
-        f.write(f'{(time() - start_time)/60} minutes')
+    if email:
+        send_results(email, cfg['Main']['path_dat'])
+    execution_time.finish()
 
 if __name__ == '__main__':
-    run_pipeline(args['seq_in'])
+    try:
+        run_pipeline(args['seq_in'], args['email'])
+    except BaseException as e:
+        send_error(args['email'], str(e))

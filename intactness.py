@@ -8,17 +8,17 @@ from Bio.SeqIO import parse as SeqIO_parse
 from intactness.__main__ import run_pipeline
 from os import path, unlink, makedirs
 from multiprocessing.pool import Pool
-from time import time
 
+import intactness.execution_time import ExecutionTime
 from intactness.args_parse import gather_args
-
-start_time = time()
 
 # cli args
 args = gather_args()
 seq_in = args['seq_in']
 
 seq_path = path.dirname(path.abspath(seq_in))
+
+execution_time = ExecutionTime(seq_path)
 
 sequence_inputs = []
 
@@ -52,5 +52,4 @@ with open(f'{seq_path}/summary.csv', 'w') as f:
 
 # unlink(f'{seq_path}/sequences')
 
-with open(f"{seq_path}/execution_time.txt", 'w') as f:
-        f.write(f'{(time() - start_time)/60} minutes')
+execution_time.finish()

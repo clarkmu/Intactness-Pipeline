@@ -3,4 +3,6 @@
 *pyc
 __pycache__
 
-/sample*
+jobs/*
+
+.bash_history

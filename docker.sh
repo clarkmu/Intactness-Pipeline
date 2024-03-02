@@ -10,8 +10,8 @@ function _build {
 }
 
 function _start {
-    #port 8181
-    docker run -dit -p 8181:8181 \
+    #port 8080
+    docker run -dit -p 8080:8080 \
         --name "$name" \
         -v "$PWD":/app \
         "$name"

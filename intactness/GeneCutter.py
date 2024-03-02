@@ -80,9 +80,9 @@ def submit_GC(path_out, seq_in):
 
     seqs = SeqIO_parse(seq_in, "fasta")
 
-    if(len(seqs) > 1):
-        split_gc(path_out, seqs)
-        return
+    # if(len(list(seqs)) > 1):
+    split_gc(path_out, seqs)
+    return
 
     input_file=f"{path_out}/seqs_psc.fasta"
     output_dir=f"{path_out}/Gene_Cutter"
