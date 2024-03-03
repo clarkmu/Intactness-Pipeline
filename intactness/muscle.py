@@ -24,3 +24,6 @@ def muscle(configs):
 
     cmd = ['muscle', '-super5', file_i, '-output', file_o]
     run_cmd(cmd)
+
+    if not exists(file_o):
+        raise BaseException("Muscle failed")

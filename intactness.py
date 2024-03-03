@@ -9,7 +9,7 @@ from intactness.__main__ import run_pipeline
 from os import path, unlink, makedirs
 from multiprocessing.pool import Pool
 
-import intactness.execution_time import ExecutionTime
+from intactness.execution_time import ExecutionTime
 from intactness.args_parse import gather_args
 
 # cli args

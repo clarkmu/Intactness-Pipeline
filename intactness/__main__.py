@@ -34,7 +34,7 @@ logger.setLevel(INFO)
 
 args = gather_args()
 
-def run_pipeline(seq_in, email):
+def run_pipeline(seq_in, email = ""):
     mod_path = path.dirname(path.abspath(__file__))
     cfg = configs(path.join(mod_path, 'default.cfg'), seq_in)
     execution_time = ExecutionTime(cfg['Main']['path_out'])
@@ -56,4 +56,5 @@ if __name__ == '__main__':
     try:
         run_pipeline(args['seq_in'], args['email'])
     except BaseException as e:
-        send_error(args['email'], str(e))
+        if args['email']:
+            send_error(args['email'], str(e))
