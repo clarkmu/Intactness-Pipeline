@@ -54,7 +54,10 @@ def psc(configs, seqs, seq_in):
         recs = SeqIO_parse(file_aln, 'fasta')
 
         # Reference
-        ref = next(recs)
+        try:
+            ref = next(recs)
+        except StopIteration:
+            continue
         len_ref = len(ref.seq.ungap('-')) - 1
 
         pos_start = int(configs[gene])

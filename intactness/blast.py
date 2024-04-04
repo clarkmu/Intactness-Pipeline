@@ -7,7 +7,7 @@ Various alignment utilities
 import logging
 import sys
 from math import inf
-
+from os import path
 from .utils import run_cmd
 
 # pylint: disable=C0103
@@ -276,7 +276,8 @@ def _prepare_qseqs(seqs, file_keep, file_keep_plus_ref, file_drop):
 
     if len(qids_keep_fwd) + len(qids_keep_rev) == 0:
         print('No sequence remained. Program was terminated!')
-        sys.exit(1)
+        return False
+        # sys.exit(1)
 
     # Get reverse sequence right
     seqs.take_rc_for(qids_keep_rev)
@@ -339,9 +340,14 @@ def blast(configs, seqs):
 
     _write_blast_summary(seqs, configs['file_summary'])
 
-    _prepare_qseqs(seqs,
+    no_seqs = _prepare_qseqs(seqs,
                    configs['file_seqs_keep'],
                    configs['file_seqs_keep_plus_ref'],
                    configs['file_seqs_drop'])
 
+    if(no_seqs == False):
+        return False
+
     _prepare_del(seqs, configs['file_seqs_del'])
+
+    return True

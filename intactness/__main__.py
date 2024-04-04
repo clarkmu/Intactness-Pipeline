@@ -35,6 +35,8 @@ logger.setLevel(INFO)
 
 args = gather_args()
 
+job_dir = path.dirname(path.abspath(args['seq_in']))
+
 def run_pipeline(seq_in, email = "", conda_env=""):
     if conda_env:
         run_cmd(['conda', 'activate', conda_env])
@@ -43,7 +45,14 @@ def run_pipeline(seq_in, email = "", conda_env=""):
     execution_time = ExecutionTime(cfg['Main']['path_out'])
     seqs = Sequences(cfg['Query'], cfg['Reference'])
     primer(cfg['Primer'], seqs)
-    blast(cfg['BLAST'], seqs)
+    found_seqs = blast(cfg['BLAST'], seqs)
+
+    if found_seqs == False:
+        with open(f"{job_dir}/no_seqs_found.txt", 'w+') as f:
+            f.write("All sequences were filtered out during Blast. No results will be generated.")
+        execution_time.finish()
+        return
+
     View(cfg['View']).run()
     muscle(cfg['MSA'])
     gag_codon(cfg['Codon'], seqs)
@@ -51,13 +60,15 @@ def run_pipeline(seq_in, email = "", conda_env=""):
     psc(cfg['PSC'], seqs, seq_in)
     defect(cfg['Defect'], seqs)
     summary(cfg['Summary'], seqs)
-    if email:
-        send_results(email, cfg['Main']['path_dat'])
+    # if email:
+    #     send_results(email, cfg['Main']['path_dat'])
     execution_time.finish()
 
 if __name__ == '__main__':
     try:
         run_pipeline(args['seq_in'], args['email'], args['conda_env'])
     except BaseException as e:
-        if args['email']:
-            send_error(args['email'], str(e))
+        with open(f"{job_dir}/error.log", 'w+') as f:
+            f.write(str(e))
+        # if args['email']:
+        #     send_error(args['email'], str(e))
