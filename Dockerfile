@@ -47,12 +47,9 @@ EXPOSE $PORT
 
 WORKDIR /app
 
-WORKDIR /app
 COPY . .
 RUN chmod -R 777 /app
 RUN chmod -R 777 /root
 USER 1001
 
-# CMD sleep infinity
-# CMD uvicorn server:app --reload --host 0.0.0.0 --port $PORT
-ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+CMD uvicorn server:app --reload --host 0.0.0.0 --port $PORT

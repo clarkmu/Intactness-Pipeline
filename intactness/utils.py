@@ -4,7 +4,7 @@ import sys
 import subprocess
 
 
-def find_gapped_pos(aln, ref_id=None, pos=0, nbp=1):
+def find_gapped_pos(aln, ref_id=None, pos=0, nbp=1, quit_no_gaps=None):
     """ Find gapped position given a position on the reference genome
 
     Parameters:
@@ -21,7 +21,9 @@ def find_gapped_pos(aln, ref_id=None, pos=0, nbp=1):
         rec = next((r for r in aln if r.id == ref_id), None)
 
         if rec is None:
-            sys.exit(1)
+            if quit_no_gaps:
+                quit_no_gaps()
+                # sys.exit(1)
 
     locations = []
     j = 0

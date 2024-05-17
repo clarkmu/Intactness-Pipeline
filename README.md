@@ -4,9 +4,9 @@ Docker is used for creating compute environments that exactly match where they w
 
 Follow [this link](#https://docs.docker.com/get-docker/) to install. <small>If link is outdated, search "How to install docker"</small>
 
-This Docker image uses `port 8181` to operate.  If your port 8181 is in use, edit `/docker.sh` and `/Dockerfile` to any available port (example, `3001`)
+This Docker image uses `port 8181` to operate.  If your port 8181 is in use, edit `/docker-compose.yml:line18` to any available port (example, `8182`)
 
-<i>If you are not running an Apple Silicon machine (M-series), see line 6-9 of /docker.sh</i>
+<i>If you are not running an Apple Silicon machine (M-series), see line 4-11 of `/docker-compose.yml`</i>
 
 # Pipeline Installation
 
@@ -14,9 +14,10 @@ Create a Docker image using the commands below. Installs dependencies with corre
 
 ```
 cd /path/to/this/directory
-sh docker.sh build
-sh docker.sh start
+docker-compose up -d
 ```
+
+This will download large amounts of data and might take a while.
 
 # Running instruction
 
@@ -24,8 +25,7 @@ Place your sequence file somewhere in this directory (ex: `./data/sample.fasta`)
 
 ```
 cd /path/to/this/directory
-sh docker.sh bash
-cd /app
+docker exec -it intactness bash
 python3 -m intactness -in /app/data/sample.fasta
 ```
 
@@ -36,3 +36,9 @@ Result summary will be found at `-in/intactness/summary.csv`
 Genome diagrams will be found at `-in/intactness/Alignment_Views/*`
 
 Note: /app is the working directory for this Docker environment.  It links and updates this code on your computer to that location.
+
+## Troubleshooting
+
+### Docker
+
+Ensure your Docker client is running.

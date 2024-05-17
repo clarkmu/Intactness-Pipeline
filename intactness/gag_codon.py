@@ -14,7 +14,7 @@ from .utils import find_gapped_pos
 logger = logging.getLogger('pipe.gag_codon')
 
 
-def gag_codon(configs, seqs):
+def gag_codon(configs, seqs, quit_no_gaps):
     """Primer check.
 
     Check whether any of the primer sequences appear in the contig. The primer
@@ -40,7 +40,7 @@ def gag_codon(configs, seqs):
         if 'HXB2' in qry.id:
             continue
 
-        pos = find_gapped_pos(ref, pos=pos_cdn-1, nbp=3)
+        pos = find_gapped_pos(ref, pos=pos_cdn-1, nbp=3, quit_no_gaps=quit_no_gaps)
 
         qry_str = str(qry.seq)
         qry_codon = ''.join(qry_str[i] for i in pos)

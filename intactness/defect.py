@@ -13,11 +13,11 @@ from .utils import find_gapped_pos
 logger = logging.getLogger('pipe.defect')
 
 
-def _detect_defect(ref, qry, pos_start, pos_end):
+def _detect_defect(ref, qry, pos_start, pos_end, quit_no_gaps):
 
     # Find tag position in reference seq, and start aln pos for the rest.
-    pos_start = find_gapped_pos(ref, pos=pos_start - 1)[0]
-    pos_end = find_gapped_pos(ref, pos=pos_end - 1)[0]
+    pos_start = find_gapped_pos(ref, pos=pos_start - 1, quit_no_gaps=quit_no_gaps)[0]
+    pos_end = find_gapped_pos(ref, pos=pos_end - 1, quit_no_gaps=quit_no_gaps)[0]
 
     # Iterate through records id, start end
     n_del = 0
@@ -31,7 +31,7 @@ def _detect_defect(ref, qry, pos_start, pos_end):
     return n_del, n_ins
 
 
-def defect(configs, seqs):
+def defect(configs, seqs, quit_no_gaps):
     """Determine if a contig has 5' defect in the tag region.
     """
     # Logging
@@ -56,7 +56,7 @@ def defect(configs, seqs):
         ref = next(aln)
         for qry in aln:
             qid = qry.id.rstrip('_Genome')
-            n_del, n_ins = _detect_defect(ref, qry, pos_start, pos_end)
+            n_del, n_ins = _detect_defect(ref, qry, pos_start, pos_end, quit_no_gaps)
 
             if n_del >= max_gaps:
                 if seqs.call[qid]['primer'] == 'No':
