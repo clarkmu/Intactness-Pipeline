@@ -18,12 +18,12 @@ logger = logging.getLogger('pipe.GeneCutter')
 GC_URL="https://www.hiv.lanl.gov/cgi-bin/GENE_CUTTER/simpleGC"
 
 def split_na_aa(text, region, aa_or_na):
-    init_seq = f">HXB2_{region}"
-    second_index = text.find(init_seq, text.find(init_seq) + 1)
+    seqs = text.split("\n")
+    num_seqs = len(seqs)
     if aa_or_na == 'na':
-        return text[:second_index]
+        return "\n".join(seqs[:num_seqs//2])
     else:
-        return text[second_index:]
+        return "\n".join(seqs[num_seqs//2:])
 
 def split_gc(path_out, seqs):
     """
