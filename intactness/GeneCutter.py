@@ -19,11 +19,20 @@ GC_URL="https://www.hiv.lanl.gov/cgi-bin/GENE_CUTTER/simpleGC"
 
 def split_na_aa(text, region, aa_or_na):
     seqs = text.split("\n")
-    num_seqs = len(seqs)
-    if aa_or_na == 'na':
-        return "\n".join(seqs[:num_seqs//2])
-    else:
-        return "\n".join(seqs[num_seqs//2:])
+    is_na = False # true but toggles at first
+    get_na = aa_or_na != 'aa'
+    results = []
+
+    for l in seqs:
+        line = l.strip()
+        if line.empty():
+            continue
+        if line.startswith('>'):
+            is_na = not is_na
+        if get_na and is_na or not get_na and not is_na:
+            results.append(line)
+
+    return "\n".join(results)
 
 def split_gc(path_out, seqs):
     """
