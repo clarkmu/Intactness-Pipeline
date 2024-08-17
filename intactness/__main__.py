@@ -12,7 +12,7 @@ from logging import getLogger, INFO
 from os import path
 
 from intactness.args_parse import gather_args
-from .email_error import send_error
+# from .email_error import send_error
 
 # Local module
 from .view import View
@@ -35,7 +35,7 @@ logger.setLevel(INFO)
 
 args = gather_args()
 
-job_dir = path.dirname(path.abspath(args['seq_in']))
+no_gaps_found = False
 
 def run_pipeline(seq_in, email = "", conda_env=""):
     if conda_env:
@@ -45,11 +45,14 @@ def run_pipeline(seq_in, email = "", conda_env=""):
     cfg = configs(path.join(mod_path, 'default.cfg'), seq_in)
     execution_time = ExecutionTime(cfg['Main']['path_out'])
 
+    job_dir = path.dirname(path.abspath(seq_in))
+
     def quit_no_gaps():
         with open(f"{job_dir}/no_gaps.txt", 'w+') as f:
             f.write("No gapped position found given a position on the reference genome. No results will be generated.")
         execution_time.finish()
-        return
+        global no_gaps_found
+        no_gaps_found = True
 
     seqs = Sequences(cfg['Query'], cfg['Reference'])
     primer(cfg['Primer'], seqs)
@@ -62,11 +65,21 @@ def run_pipeline(seq_in, email = "", conda_env=""):
         return
 
     View(cfg['View']).run()
+
     muscle(cfg['MSA'])
+
     gag_codon(cfg['Codon'], seqs, quit_no_gaps)
+    if no_gaps_found:
+        return
+
     hypermut(cfg['Hypermut'], seqs)
+
     psc(cfg['PSC'], seqs, seq_in)
+
     defect(cfg['Defect'], seqs, quit_no_gaps)
+    if no_gaps_found:
+        return
+
     summary(cfg['Summary'], seqs)
     # if email:
     #     send_results(email, cfg['Main']['path_dat'])
@@ -76,7 +89,8 @@ if __name__ == '__main__':
     try:
         run_pipeline(args['seq_in'], args['email'], args['conda_env'])
     except BaseException as e:
+        job_dir = path.dirname(path.abspath(args['seq_in']))
         with open(f"{job_dir}/error.log", 'w+') as f:
             f.write("An uncaught error has occurred during processing:\n" + str(e))
-        if args['email']:
-            send_error(args['email'], str(e))
+        # if args['email']:
+        #     send_error(args['email'], str(e))
